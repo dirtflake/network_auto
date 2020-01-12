@@ -1,0 +1,60 @@
+#!/usr/bin/env python
+
+import ssh
+import getpass
+import sys
+import paramiko
+from contextlib import contextmanager
+
+def exec_command(client, cmd):
+	stdin, stdout, stderr = client.exec_command(cmd)
+	stdout=stdout.readlines()
+	output=""
+	for line in stdout:
+		output=output+line
+	if output!="":
+		return output
+	else:
+		return "There was no output for command : " + cmd
+	
+
+user = raw_input("Enter your SSH username: ")
+password = getpass.getpass()
+
+filename = "sub_login_error.txt"
+
+
+with open (filename, 'r') as fp:
+	line=fp.readline()
+	while line:
+		print (line)
+		print ("++++++++++++\n")
+		try:
+			client = paramiko.SSHClient()
+			client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+		   	client.connect(line, username= user, password= password)
+			output = ""
+			output = output + exec_command(client, 'show version | i SW')
+			#Actual print place
+			client.close()
+
+			client = paramiko.SSHClient()
+			client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+		   	client.connect(line, username= user, password= password)
+			#output = output + "\n" + exec_command(client, 'Show ip interface brief | i ' + line[0:len(line)-2])
+			output = output + "\n" + exec_command(client, 'Show ip arp | i ' + line[0:len(line)-2])# used arp cmd because the Subnet was configure as Secondary Vlan
+			client.close()
+			print (output)
+
+		#except: # > blank exception where all errors are ignored and program continues
+		except Exception as ex: # >> to capture what error was generated during the program
+		#except paramiko.ssh_exception.AuthenticationException as e:
+			#print (e.message) # when we know what exception to expect this to print the error under it
+			print ("***Some Issue try Manually\n")
+			template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+			message = template.format(type(ex).__name__, ex.args)
+    			print message
+			print ("\n")
+
+		line=fp.readline()
+#
