@@ -1,0 +1,47 @@
+#!/usr/bin/env python3
+import ast
+import os
+from netmiko import ConnectHandler
+from datetime import datetime
+
+#Creating a directory on based of present date.
+#Used Exception because there might be a folder already
+os.chdir('/home/cchitturi/backup_config')
+pre_folder = os.getcwd()
+try:
+    folder_name = datetime.now().strftime('%b_%d_%Y')
+    os.makedirs(folder_name)
+    #pre_folder = os.getcwd()
+except:
+    pass
+
+#For Switches sites with NX-OS, IO-XE & IOS
+file = open("herbie_sw.txt", "r")
+for x in file:
+    date = datetime.now().strftime('_%m_%d_%Y_%H_%M')
+    dictionary = ast.literal_eval(x)
+
+    try:
+        net_connect = ConnectHandler(**dictionary)
+        if dictionary['device_type'] == 'cisco_ios':
+           net_connect.enable()
+        #net_connect.send_command('terminal length 0')
+        output = net_connect.send_command('show running-config')
+
+    except:
+        pass
+
+#Exception as ex: # >> to capture what error was generated during the program
+#        print ("***Some Issue try Manually\n")
+#       template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+#        message = template.format(type(ex).__name__, ex.args)
+#        print (message)
+#        print ("\n")
+
+    os.chdir(folder_name)
+    f = open(dictionary['host'] + date + ".txt", "a")
+    print(output, file=f)
+    f.close()
+    os.chdir(pre_folder)
+    net_connect.disconnect()
+file.close()
