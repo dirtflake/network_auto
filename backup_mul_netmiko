@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import ast
 import os
+import time
 from netmiko import ConnectHandler
 from datetime import datetime
 
@@ -11,7 +12,6 @@ pre_folder = os.getcwd()
 try:
     folder_name = datetime.now().strftime('%b_%d_%Y')
     os.makedirs(folder_name)
-    #pre_folder = os.getcwd()
 except:
     pass
 
@@ -25,9 +25,8 @@ for x in file:
         net_connect = ConnectHandler(**dictionary)
         if dictionary['device_type'] == 'cisco_ios':
            net_connect.enable()
-        #net_connect.send_command('terminal length 0')
         output = net_connect.send_command('show running-config')
-
+        net_connect.disconnect()
     except:
         pass
 
@@ -36,12 +35,17 @@ for x in file:
 #       template = "An exception of type {0} occurred. Arguments:\n{1!r}"
 #        message = template.format(type(ex).__name__, ex.args)
 #        print (message)
-#        print ("\n")
 
     os.chdir(folder_name)
+    today_folder = os.getcwd()
     f = open(dictionary['host'] + date + ".txt", "a")
     print(output, file=f)
     f.close()
+    dictionary.clear()
     os.chdir(pre_folder)
-    net_connect.disconnect()
+    #net_connect.disconnect()
 file.close()
+
+time.sleep(200)
+command_scp = "sshpass -p 'type password' scp -r " + today_folder + " user@server:/remote_destination_folder"
+os.system(command_scp)
