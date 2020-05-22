@@ -1,0 +1,23 @@
+#!/usr/bin/env python3
+import csv
+from netmiko import ConnectHandler
+
+dictionary = {'device_type': 'cisco_ios', 'ip': '', 'username': 'user', 'password': 'pass', 'secret': 'pass',}
+file = open("sample_ip.txt", "r")
+output=''
+
+for x in file: 
+    dictionary ['ip'] = x.strip()
+    try:
+        net_connect = ConnectHandler(**dictionary)
+        net_connect.enable()
+        output = net_connect.send_command('show version | i Version')
+        net_connect.disconnect()
+    except:
+        pass
+        
+    with open('sample_result.csv', 'a', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow([dictionary ['ip'], output]) 
+    output = ''
+file.close()
