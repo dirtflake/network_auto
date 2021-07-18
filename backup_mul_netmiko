@@ -16,7 +16,7 @@ except:
     pass
 
 #For Switches sites with NX-OS, IO-XE & IOS
-file = open("herbie_sw.txt", "r")
+file = open("devices_sw.txt", "r")
 for x in file:
     date = datetime.now().strftime('_%m_%d_%Y_%H_%M')
     dictionary = ast.literal_eval(x)
