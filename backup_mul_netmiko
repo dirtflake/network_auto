@@ -7,7 +7,7 @@ from datetime import datetime
 
 #Creating a directory on based of present date.
 #Used Exception because there might be a folder already
-os.chdir('/home/cchitturi/backup_config')
+os.chdir('/home/user/backup_config')
 pre_folder = os.getcwd()
 try:
     folder_name = datetime.now().strftime('%b_%d_%Y')
